@@ -241,6 +241,7 @@
     <ClCompile Include="src\Features\NavBot\NBcore.cpp" />
     <ClCompile Include="src\Features\NavBot\NBengi.cpp" />
     <ClCompile Include="src\Features\NavBot\NBdanger.cpp" />
+    <ClCompile Include="src\Features\NavBot\NBmvm.cpp" />
     <ClCompile Include="src\Features\NavBot\NBcord.cpp" />
     <ClCompile Include="src\Features\NavBot\NButils.cpp" />
     <ClCompile Include="src\Features\AutoJoin\AutoJoin.cpp" />

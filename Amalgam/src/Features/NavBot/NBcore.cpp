@@ -18,10 +18,13 @@
 #include <functional>
 #include <algorithm>
 #include <cmath>
+#include <boost/property_tree/ptree.hpp>
+#include <boost/property_tree/json_parser.hpp>
+#include <filesystem>
 
 bool CNavBot::ShouldSearchHealth(CTFPlayer* pLocal, bool bLowPrio) const
 {
-	if (!(Vars::NavEng::NavBot::Preferences.Value & Vars::NavEng::NavBot::PreferencesEnum::SearchHealth))
+	if (!IsMvMMode() && !(Vars::NavEng::NavBot::Preferences.Value & Vars::NavEng::NavBot::PreferencesEnum::SearchHealth))
 		return false;
 
 	// Priority too high
@@ -44,7 +47,7 @@ bool CNavBot::ShouldSearchHealth(CTFPlayer* pLocal, bool bLowPrio) const
 
 bool CNavBot::ShouldSearchAmmo(CTFPlayer* pLocal) const
 {
-	if (!(Vars::NavEng::NavBot::Preferences.Value & Vars::NavEng::NavBot::PreferencesEnum::SearchAmmo))
+	if (!IsMvMMode() && !(Vars::NavEng::NavBot::Preferences.Value & Vars::NavEng::NavBot::PreferencesEnum::SearchAmmo))
 		return false;
 
 	// Priority too high
@@ -1675,6 +1678,25 @@ bool CNavBot::Roam(CTFPlayer* pLocal, CTFWeaponBase* pWeapon)
 	if (F::NavEngine.current_priority > patrol)
 		return false;
 
+	// In MvM mode, roam near configured spawn spots
+	if (IsMvMMode() && !m_vMvMSpawnSpots.empty())
+	{
+		Vector vLocalPos = pLocal->GetAbsOrigin();
+		float bestDist = FLT_MAX;
+		Vector bestSpot;
+		for (const auto& spot : m_vMvMSpawnSpots)
+		{
+			float d = spot.DistToSqr(vLocalPos);
+			if (d < bestDist)
+			{
+				bestDist = d;
+				bestSpot = spot;
+			}
+		}
+		if (F::NavEngine.navTo(bestSpot, patrol, true, !F::NavEngine.isPathing()))
+			return true;
+	}
+
 	// Defend our objective if possible
 	if (Vars::NavEng::NavBot::Preferences.Value & Vars::NavEng::NavBot::PreferencesEnum::DefendObjectives)
 	{
@@ -1935,6 +1957,10 @@ bool CNavBot::EscapeProjectiles(CTFPlayer* pLocal)
 bool CNavBot::EscapeDanger(CTFPlayer* pLocal)
 {
 	if (!(Vars::NavEng::NavBot::Preferences.Value & Vars::NavEng::NavBot::PreferencesEnum::EscapeDanger))
+		return false;
+
+	// Ignore danger completely for pyro and scout in MvM mode
+	if (ShouldIgnoreDangerInMvM(pLocal))
 		return false;
 
 	// Don't escape while we have the intel
@@ -2364,7 +2390,18 @@ void CNavBot::Run(CTFPlayer* pLocal, CTFWeaponBase* pWeapon, CUserCmd* pCmd)
 		if (pLocal->m_iClass() == TF_CLASS_SNIPER)
 			vTasks.emplace_back(snipe_sentry, [&]() { return SnipeSentries(pLocal); });
 		
-		vTasks.emplace_back(staynear, [&]() { return StayNear(pLocal, pWeapon); });
+		if (IsMvMMode())
+		{
+			if (pLocal->m_iClass() == TF_CLASS_PYRO)
+				vTasks.emplace_back(staynear, [&]() { return MvMPyroTankLogic(pLocal, pWeapon, pCmd) || MvMStayNear(pLocal, pWeapon); });
+			else
+				vTasks.emplace_back(staynear, [&]() { return MvMStayNear(pLocal, pWeapon); });
+		}
+		else
+		{
+			vTasks.emplace_back(staynear, [&]() { return StayNear(pLocal, pWeapon); });
+		}
+		
 		vTasks.emplace_back(run_reload, [&]() { return MoveInFormation(pLocal, pWeapon); });
 		vTasks.emplace_back(patrol, [&]() { return Roam(pLocal, pWeapon); });
 
@@ -2459,4 +2496,98 @@ void CNavBot::Reset( )
 	// Clear new blacklist management data
 	m_mAreaDangerScore.clear();
 	m_mAreaBlacklistExpiry.clear();
+	// Load configured MvM spawn spots for this map
+	{
+		std::string levelName = I::EngineClient->GetLevelName();
+		auto pos = levelName.find_last_of('.');
+		std::string mapName = (pos != std::string::npos) ? levelName.substr(0, pos) : levelName;
+		LoadMvMSpawnSpots(mapName);
+	}
+}
+
+// Implement MvM spawn spots persistence
+void CNavBot::LoadMvMSpawnSpots(const std::string& mapName)
+{
+	m_vMvMSpawnSpots.clear();
+	try
+	{
+		std::string key = mapName;
+		// Extract only the base map name (remove directory prefixes)
+		if (auto slashPos = key.find_last_of("/\\"); slashPos != std::string::npos)
+			key = key.substr(slashPos + 1);
+		std::string path = F::Configs.m_sConfigPath + "MvMSpawnSpots_" + key + ".json";
+		if (!std::filesystem::exists(path))
+			return;
+		boost::property_tree::ptree tree;
+		boost::property_tree::read_json(path, tree);
+		if (auto opt = tree.get_child_optional("SpawnSpots"))
+		{
+			for (auto& item : *opt)
+			{
+				auto& node = item.second;
+				Vector v;
+				v.x = node.get<float>("x");
+				v.y = node.get<float>("y");
+				v.z = node.get<float>("z");
+				m_vMvMSpawnSpots.push_back(v);
+			}
+		}
+	}
+	catch (...)
+	{
+		SDK::Output("NavBot", "Failed to load MvM spawn spots", {255,50,50}, true, true);
+	}
+}
+
+void CNavBot::SaveMvMSpawnSpots(const std::string& mapName) const
+{
+	try
+	{
+		boost::property_tree::ptree tree;
+		boost::property_tree::ptree spTree;
+		for (auto& v : m_vMvMSpawnSpots)
+		{
+			boost::property_tree::ptree entry;
+			entry.put("x", v.x);
+			entry.put("y", v.y);
+			entry.put("z", v.z);
+			spTree.push_back(std::make_pair("", entry));
+		}
+		tree.put_child("SpawnSpots", spTree);
+		std::string key = mapName;
+		if (auto slashPos = key.find_last_of("/\\"); slashPos != std::string::npos)
+			key = key.substr(slashPos + 1);
+		std::string path = F::Configs.m_sConfigPath + "MvMSpawnSpots_" + key + ".json";
+		boost::property_tree::write_json(path, tree);
+	}
+	catch (...)
+	{
+		SDK::Output("NavBot", "Failed to save MvM spawn spots", {255,50,50}, true, true);
+	}
+}
+
+void CNavBot::AddMvMSpawnSpot(const Vector& spot)
+{
+	std::string levelName = I::EngineClient->GetLevelName();
+	auto pos = levelName.find_last_of('.');
+	std::string mapName = (pos != std::string::npos) ? levelName.substr(0, pos) : levelName;
+	// Sanitize map name to exclude directories
+	if (auto slashPos = mapName.find_last_of("/\\"); slashPos != std::string::npos)
+		mapName = mapName.substr(slashPos + 1);
+	m_vMvMSpawnSpots.push_back(spot);
+	SaveMvMSpawnSpots(mapName);
+	SDK::Output("NavBot", std::format("Added MvM spawn spot ({:.0f}, {:.0f}, {:.0f}) for map {}", spot.x, spot.y, spot.z, mapName).c_str(), {0,255,0}, true, true);
+}
+
+void CNavBot::ClearMvMSpawnSpots()
+{
+	std::string levelName = I::EngineClient->GetLevelName();
+	auto pos = levelName.find_last_of('.');
+	std::string mapName = (pos != std::string::npos) ? levelName.substr(0, pos) : levelName;
+	// Sanitize map name to exclude directories
+	if (auto slashPos = mapName.find_last_of("/\\"); slashPos != std::string::npos)
+		mapName = mapName.substr(slashPos + 1);
+	m_vMvMSpawnSpots.clear();
+	SaveMvMSpawnSpots(mapName);
+	SDK::Output("NavBot", std::format("Cleared MvM spawn spots for map {}", mapName).c_str(), {0,255,0}, true, true);
 }

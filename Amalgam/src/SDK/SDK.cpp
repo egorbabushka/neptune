@@ -1087,6 +1087,14 @@ std::string SDK::GetLevelName()
 	return { data + slash, bsp - slash };
 }
 
+bool SDK::IsMvM()
+{
+	std::string mapName = GetLevelName();
+	std::transform(mapName.begin(), mapName.end(), mapName.begin(), [](unsigned char c) { return static_cast<char>(std::tolower(c)); });
+	
+	return mapName.find("mvm_") != std::string::npos;
+}
+
 bool SDK::IsSaxton(CTFPlayer* pPlayer)
 {
 	if (!pPlayer)

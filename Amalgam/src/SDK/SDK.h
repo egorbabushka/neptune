@@ -129,5 +129,6 @@ namespace SDK
 	bool WeaponDoesNotUseAmmo( int WeaponID, int DefIdx, bool bIncludeInfiniteAmmo = true );
 	int GetWeaponMaxReserveAmmo( int WeaponID, int DefIdx );
 	std::string GetLevelName( );
+	bool IsMvM();
 	bool IsSaxton(CTFPlayer* pPlayer = nullptr);
 }

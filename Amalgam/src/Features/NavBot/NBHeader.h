@@ -170,7 +170,26 @@ private:
 	bool IsFailedBuildingSpot(const Vector& spot) const;
 	void AddFailedBuildingSpot(const Vector& spot);
 
+	// MvM specific functions
+	bool IsMvMMode() const;
+	bool IsMvMTank(CBaseEntity* pEntity) const;
+	bool IsMvMBot(CTFPlayer* pPlayer) const;
+	bool IsBombCarrier(CTFPlayer* pPlayer) const;
+	int GetMvMTargetPriority(CTFPlayer* pPlayer) const;
+	bot_class_config GetMvMClassConfig(CTFPlayer* pLocal) const;
+	bool ShouldIgnoreDangerInMvM(CTFPlayer* pLocal) const;
+	slots GetMvMBestSlot(CTFPlayer* pLocal, slots eActiveSlot, ClosestEnemy_t tClosestEnemy);
+	bool MvMPyroTankLogic(CTFPlayer* pLocal, CTFWeaponBase* pWeapon, CUserCmd* pCmd);
+	std::vector<CTFPlayer*> GetMvMTargetsByPriority(CTFPlayer* pLocal) const;
+	std::optional<Vector> GetMvMBotClusterPos(CTFPlayer* pLocal) const;
+	bool MvMStayNear(CTFPlayer* pLocal, CTFWeaponBase* pWeapon);
+
 public:
+    std::vector<Vector> m_vMvMSpawnSpots;
+    void AddMvMSpawnSpot(const Vector& spot);
+    void ClearMvMSpawnSpots();
+    void LoadMvMSpawnSpots(const std::string& mapName);
+    void SaveMvMSpawnSpots(const std::string& mapName) const;
 	void Run(CTFPlayer* pLocal, CTFWeaponBase* pWeapon, CUserCmd* pCmd);
 	void Reset();
 };

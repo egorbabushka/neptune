@@ -75,6 +75,9 @@ class CMisc
 	Timer m_tStealIdentityTimer;
 	int m_nStolenAvatar = -1;
 
+	int m_buybot_step = 1;
+	float m_buybot_clock = 0.0f;
+
 public:
 	void RunPre(CTFPlayer* pLocal, CUserCmd* pCmd);
 	void RunPost(CTFPlayer* pLocal, CUserCmd* pCmd, bool pSendPacket);
@@ -91,6 +94,9 @@ public:
 	void LoadVotekickConfig();
 	void LoadAutoReplyConfig();
 	void AutoMvmReadyUp();
+	
+	void ExecBuyBot(CTFPlayer* pLocal);
+	void ResetBuyBot();
 	
 	void ChatRelay(int speaker, const char* text, bool teamChat = false);
 	void InitializeChatRelay();

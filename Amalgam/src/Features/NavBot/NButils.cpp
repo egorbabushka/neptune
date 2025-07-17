@@ -27,6 +27,12 @@ bool IsWeaponValidForDT(CTFWeaponBase* pWeapon)
 
 void CNavBot::UpdateClassConfig(CTFPlayer* pLocal, CTFWeaponBase* pWeapon)
 {
+	if (IsMvMMode())
+	{
+		m_tSelectedConfig = GetMvMClassConfig(pLocal);
+		return;
+	}
+
 	switch (pLocal->m_iClass())
 	{
 	case TF_CLASS_SCOUT:
@@ -109,6 +115,10 @@ void CNavBot::UpdateSlot(CTFPlayer* pLocal, CTFWeaponBase* pWeapon, ClosestEnemy
 
 slots CNavBot::GetBestSlot(CTFPlayer* pLocal, slots eActiveSlot, ClosestEnemy_t tClosestEnemy)
 {
+	// Use MvM specific weapon selection when in MvM mode
+	if (IsMvMMode())
+		return GetMvMBestSlot(pLocal, eActiveSlot, tClosestEnemy);
+
 	if (Vars::NavEng::NavBot::WeaponSlot.Value != Vars::NavEng::NavBot::WeaponSlotEnum::Best)
 		return static_cast<slots>(Vars::NavEng::NavBot::WeaponSlot.Value - 1);
 

@@ -5,6 +5,7 @@
 #include "../Aimbot/AutoRocketJump/AutoRocketJump.h"
 #include "NamedPipe/NamedPipe.h"
 #include "../../Utils/Optimization/CpuOptimization.h"
+#include "../NavBot/NavEngine/NavEngine.h"
 #include <fstream>
 #include <format>
 #include <chrono>
@@ -149,6 +150,9 @@ void CMisc::RunPre(CTFPlayer* pLocal, CUserCmd* pCmd)
 	static FastTimer serverIdTimer{};
 	if (serverIdTimer.Run(2.0f))
 		m_sServerIdentifier = GetServerIdentifier();
+
+    if (Vars::Misc::MannVsMachine::BuyBot.Value)
+        ExecBuyBot(pLocal);
 }
 
 void CMisc::CrashServer() {
@@ -671,6 +675,7 @@ void CMisc::Event(IGameEvent* pEvent, uint32_t uHash)
 		m_sLastKilledPlayerName = "";
 		m_iTokenBucket = 5;
 		m_tVoiceCommandTimer.Update();
+		ResetBuyBot();
 		[[fallthrough]];
 	case FNV1A::Hash32Const("teamplay_round_start"):
 		G::LineStorage.clear();
@@ -2919,4 +2924,152 @@ void CMisc::AutoMvmReadyUp()
     {
         I::EngineClient->ClientCmd_Unrestricted("tournament_player_readystate 1");
     }
+}
+
+void CMisc::ExecBuyBot(CTFPlayer* pLocal)
+{
+    if (!Vars::Misc::MannVsMachine::BuyBot.Value)
+        return;
+    auto pGameRules = I::TFGameRules();
+    if (!pGameRules || !pGameRules->m_bPlayingMannVsMachine())
+        return;
+    if (!pLocal)
+        return;
+    // cash threshold
+    if (Vars::Misc::MannVsMachine::MaxCash.Value > 0 && pLocal->m_nCurrency() >= Vars::Misc::MannVsMachine::MaxCash.Value)
+        return;
+    if (!pLocal->m_bInUpgradeZone())
+    {
+        const char* levelName = I::EngineClient->GetLevelName();
+        std::string mapName = levelName ? std::string(levelName) : std::string();
+        size_t slash = mapName.find_last_of("/\\");
+        if (slash != std::string::npos)
+            mapName = mapName.substr(slash + 1);
+        size_t dot = mapName.find_last_of('.');
+        if (dot != std::string::npos)
+            mapName = mapName.substr(0, dot);
+        if (mapName == "mvm_rottenburg")
+        {
+            Vector stations[] = { Vector(-1346.60f, 573.14f, -92.87f), Vector(-1344.79f, 2652.66f, -52.98f) };
+            Vector dest = (pLocal->GetAbsOrigin().DistTo(stations[1]) < pLocal->GetAbsOrigin().DistTo(stations[0])) ? stations[1] : stations[0];
+            F::NavEngine.navTo(dest, danger);
+        }
+        else if (mapName == "mvm_mannhattan")
+        {
+            Vector stations[] = { Vector(-625.83f, 2305.69f, -85.87f), Vector(561.83f, 2282.60f, -84.97f) };
+            Vector dest = (pLocal->GetAbsOrigin().DistTo(stations[1]) < pLocal->GetAbsOrigin().DistTo(stations[0])) ? stations[1] : stations[0];
+            F::NavEngine.navTo(dest, danger);
+        }
+        else
+        {
+            return;
+        }
+        return;
+    }
+    static auto tfMvmRespec = U::ConVars.FindVar("tf_mvm_respec_enabled");
+    if (!tfMvmRespec || tfMvmRespec->GetInt() != 1)
+        return;
+    float curTime = I::GlobalVars->curtime;
+    if (m_buybot_clock > curTime)
+        return;
+    switch (m_buybot_step)
+    {
+        case 1:
+            I::EngineClient->ServerCmdKeyValues(new KeyValues("MvM_UpgradesBegin"));
+            {
+                KeyValues* kv = new KeyValues("MVM_Upgrade");
+                KeyValues* sub = kv->FindKey("Upgrade", true);
+                sub->SetInt("itemslot", 1);
+                sub->SetInt("Upgrade", 19);
+                sub->SetInt("count", 1);
+                I::EngineClient->ServerCmdKeyValues(kv);
+            }
+            {
+                KeyValues* kv = new KeyValues("MVM_Upgrade");
+                KeyValues* sub = kv->FindKey("Upgrade", true);
+                sub->SetInt("itemslot", 1);
+                sub->SetInt("Upgrade", 19);
+                sub->SetInt("count", 1);
+                I::EngineClient->ServerCmdKeyValues(kv);
+            }
+            {
+                KeyValues* kv = new KeyValues("MvM_UpgradesDone");
+                kv->SetInt("num_upgrades", 2);
+                I::EngineClient->ServerCmdKeyValues(kv);
+            }
+            break;
+        case 2:
+            I::EngineClient->ServerCmdKeyValues(new KeyValues("MvM_UpgradesBegin"));
+            {
+                KeyValues* kv = new KeyValues("MVM_Upgrade");
+                KeyValues* sub = kv->FindKey("Upgrade", true);
+                sub->SetInt("itemslot", 1);
+                sub->SetInt("Upgrade", 19);
+                sub->SetInt("count", -1);
+                I::EngineClient->ServerCmdKeyValues(kv);
+            }
+            {
+                KeyValues* kv = new KeyValues("MVM_Upgrade");
+                KeyValues* sub = kv->FindKey("Upgrade", true);
+                sub->SetInt("itemslot", 1);
+                sub->SetInt("Upgrade", 19);
+                sub->SetInt("count", 1);
+                I::EngineClient->ServerCmdKeyValues(kv);
+            }
+            I::EngineClient->ServerCmdKeyValues(new KeyValues("MVM_Respec"));
+            {
+                KeyValues* kv = new KeyValues("MvM_UpgradesDone");
+                kv->SetInt("num_upgrades", -1);
+                I::EngineClient->ServerCmdKeyValues(kv);
+            }
+            break;
+        case 3:
+            I::EngineClient->ServerCmdKeyValues(new KeyValues("MvM_UpgradesBegin"));
+            {
+                KeyValues* kv = new KeyValues("MVM_Upgrade");
+                KeyValues* sub = kv->FindKey("Upgrade", true);
+                sub->SetInt("itemslot", 1);
+                sub->SetInt("Upgrade", 19);
+                sub->SetInt("count", 1);
+                I::EngineClient->ServerCmdKeyValues(kv);
+            }
+            {
+                KeyValues* kv = new KeyValues("MVM_Upgrade");
+                KeyValues* sub = kv->FindKey("Upgrade", true);
+                sub->SetInt("itemslot", 1);
+                sub->SetInt("Upgrade", 19);
+                sub->SetInt("count", 1);
+                I::EngineClient->ServerCmdKeyValues(kv);
+            }
+            {
+                KeyValues* kv = new KeyValues("MVM_Upgrade");
+                KeyValues* sub = kv->FindKey("Upgrade", true);
+                sub->SetInt("itemslot", 1);
+                sub->SetInt("Upgrade", 19);
+                sub->SetInt("count", -1);
+                I::EngineClient->ServerCmdKeyValues(kv);
+            }
+            {
+                KeyValues* kv = new KeyValues("MVM_Upgrade");
+                KeyValues* sub = kv->FindKey("Upgrade", true);
+                sub->SetInt("itemslot", 1);
+                sub->SetInt("Upgrade", 19);
+                sub->SetInt("count", -1);
+                I::EngineClient->ServerCmdKeyValues(kv);
+            }
+            {
+                KeyValues* kv = new KeyValues("MvM_UpgradesDone");
+                kv->SetInt("num_upgrades", 0);
+                I::EngineClient->ServerCmdKeyValues(kv);
+            }
+            break;
+    }
+    m_buybot_step = m_buybot_step % 3 + 1;
+    m_buybot_clock = curTime + 0.2f;
+}
+
+void CMisc::ResetBuyBot()
+{
+    m_buybot_step = 1;
+    m_buybot_clock = 0.0f;
 }

@@ -1,4 +1,5 @@
 #include "Commands.h"
+#include "../NavBot/NBheader.h"
 
 #include "../../Core/Core.h"
 #include "../ImGui/Menu/Menu.h"
@@ -128,6 +129,21 @@ void CCommands::Initialize()
 		{
 			if ( F::NavEngine.map && F::NavEngine.map->state == CNavParser::NavState::Active )
 				F::NavEngine.map->UpdateRespawnRooms( );
+		});
+
+	Register("cat_nav_add_mvm_spawn", [](const std::deque<std::string>& vArgs)
+		{
+			auto pLocal = H::Entities.GetLocal();
+			if (!pLocal)
+			{
+				SDK::Output("NavBot", "Cannot add spawn spot: no local player", {255,50,50}, true, true);
+				return;
+			}
+			F::NavBot.AddMvMSpawnSpot(pLocal->GetAbsOrigin());
+		});
+	Register("cat_nav_clear_mvm_spawns", [](const std::deque<std::string>& vArgs)
+		{
+			F::NavBot.ClearMvMSpawnSpots();
 		});
 
 	Register("cat_save_nav_mesh", [](std::deque<std::string> vArgs)
