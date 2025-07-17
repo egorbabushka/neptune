@@ -1,8 +1,11 @@
 #include "AutoQueue.h"
 #include "../../Players/PlayerUtils.h"
+#include "AutoCommunityServer.h"
 
 void CAutoQueue::Run()
 {
+	CAutoCommunityServer *AutoCommunityServer = new CAutoCommunityServer();
+	AutoCommunityServer->Run();
 	static float flLastQueueTime = 0.0f;
 	static bool bQueuedOnce = false;
 	static bool bWasInGame = false;

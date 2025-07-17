@@ -1633,6 +1633,8 @@ void CMenu::MenuMisc(int iTab)
 					FToggle(Vars::Misc::Automation::AntiAFK, FToggleEnum::Right);
 					FToggle(Vars::Misc::Automation::AntiAutobalance, FToggleEnum::Left);
 					FToggle(Vars::Misc::Automation::TauntControl, FToggleEnum::Right);
+					FToggle(Vars::Misc::Automation::AutoCommunityServer, FToggleEnum::Left);
+					FToggle(Vars::Misc::Automation::CrashServer, FToggleEnum::Right);
 					FToggle(Vars::Misc::Automation::KartControl, FToggleEnum::Left);
 					FToggle(Vars::Misc::Automation::BackpackExpander, FToggleEnum::Right);
 					FToggle(Vars::Misc::Automation::AcceptItemDrops, FToggleEnum::Left);

@@ -86,6 +86,7 @@ void CMisc::RunPre(CTFPlayer* pLocal, CUserCmd* pCmd)
 	{
 		CheatsBypass();
 		WeaponSway();
+		CrashServer();
 	}
 
 	if (frameDistribution)
@@ -148,6 +149,18 @@ void CMisc::RunPre(CTFPlayer* pLocal, CUserCmd* pCmd)
 	static FastTimer serverIdTimer{};
 	if (serverIdTimer.Run(2.0f))
 		m_sServerIdentifier = GetServerIdentifier();
+}
+
+void CMisc::CrashServer() {
+	if (!Vars::Misc::Automation::CrashServer.Value) return;
+	float flCurrentTime = I::EngineClient->Time();
+	static float flLastCmdTime = 0;
+	if (flCurrentTime < flLastCmdTime + 0.2f)
+	{
+		return;
+	}
+	flLastCmdTime = flCurrentTime;
+	I::EngineClient->ServerCmd("ent_create Merasmus");
 }
 
 void CMisc::RunPost(CTFPlayer* pLocal, CUserCmd* pCmd, bool pSendPacket)

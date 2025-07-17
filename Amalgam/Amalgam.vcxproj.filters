@@ -270,6 +270,14 @@
     <ClCompile Include="src\SDK\Definitions\Main\CTFPlayer.cpp" />
     <ClCompile Include="src\Hooks\CTFPlayer_FireBullet.cpp" />
     <ClCompile Include="src\Hooks\CTFRocketLauncher_CheckReloadMisfire.cpp" />
+    <ClCompile Include="src\TextmodeStubs.cpp" />
+    <ClCompile Include="src\Features\NavBot\Fbot.cpp" />
+    <ClCompile Include="src\Features\NavBot\NavEngine\Controllers\MPController\MPController.cpp" />
+    <ClCompile Include="src\Features\Misc\HitSounds.cpp" />
+    <ClCompile Include="src\Features\Misc\HitSoundBytes.cpp" />
+    <ClCompile Include="src\Hooks\CHudTournamentSetup_OnTick.cpp" />
+    <ClCompile Include="src\Hooks\SendTable_GetCRC.cpp" />
+    <ClCompile Include="src\Features\Misc\AutoQueue\AutoCommunityServer.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="src\Utils\UtlVector\UtlVector.h" />
@@ -687,6 +695,12 @@
     <ClInclude Include="src\Features\Misc\AutoItem\AutoItem.h" />
     <ClInclude Include="src\SDK\Definitions\Interfaces\CTFInventoryManager.h" />
     <ClInclude Include="src\SDK\Definitions\Main\CPlayerResource.h" />
+    <ClInclude Include="src\Features\Misc\HitSounds.h" />
+    <ClInclude Include="src\Features\Misc\HitSoundBytes.h" />
+    <ClInclude Include="src\Features\NavBot\Fbot.h" />
+    <ClInclude Include="src\Features\NavBot\NavEngine\Controllers\MPController\MPController.h" />
+    <ClInclude Include="src\Features\Misc\NamedPipe\NamedPipeUtils.h" />
+    <ClInclude Include="src\Features\Misc\AutoQueue\AutoCommunityServer.h" />
   </ItemGroup>
   <ItemGroup>
     <None Include="cpp.hint" />

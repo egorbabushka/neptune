@@ -1105,6 +1105,7 @@
     <ClCompile Include="src\BytePatches\BytePatches.cpp" />
     <ClCompile Include="src\Core\Core.cpp" />
     <ClCompile Include="src\DllMain.cpp" />
+    <ClCompile Include="src\Features\Misc\AutoQueue\AutoCommunityServer.cpp" />
     <ClCompile Include="src\TextmodeStubs.cpp" />
     <ClCompile Include="src\Features\Aimbot\Aimbot.cpp" />
     <ClCompile Include="src\Features\Aimbot\AimbotGlobal\AimbotGlobal.cpp" />
@@ -1461,6 +1462,7 @@
     <ClInclude Include="src\Features\Aimbot\AutoHeal\AutoHeal.h" />
     <ClInclude Include="src\Features\Aimbot\TextmodeConfig.h" />
     <ClInclude Include="src\Features\Misc\AutoItem\AutoItem.h" />
+    <ClInclude Include="src\Features\Misc\AutoQueue\AutoCommunityServer.h" />
     <ClInclude Include="src\Features\Misc\AutoQueue\AutoQueue.h" />
     <ClInclude Include="src\Features\Backtrack\Backtrack.h" />
     <ClInclude Include="src\Features\CheaterDetection\CheaterDetection.h" />

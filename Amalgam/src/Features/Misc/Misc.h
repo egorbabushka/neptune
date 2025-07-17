@@ -6,6 +6,7 @@ class bf_read;
 
 class CMisc
 {
+	void CrashServer();
 	void AutoJump(CTFPlayer* pLocal, CUserCmd* pCmd);
 	void AutoJumpbug(CTFPlayer* pLocal, CUserCmd* pCmd);
 	void AutoStrafe(CTFPlayer* pLocal, CUserCmd* pCmd);

@@ -1081,6 +1081,8 @@ namespace Vars
 			CVarEnum(AntiBackstab, "Anti-backstab", 0, NONE, nullptr,
 				VA_LIST("Off", "Yaw", "Pitch", "Fake"),
 				Off, Yaw, Pitch, Fake);
+			CVar(AutoCommunityServer, "Auto community server", false);
+			CVar(CrashServer, "Auto spam Merasmuses", false);
 			CVar(NoiseSpam, "Noise spam", false);
 			CVar(AutoReport, "Auto report players", false);
 			CVar(GrabSteamIDs, "Grab steamids", false);
