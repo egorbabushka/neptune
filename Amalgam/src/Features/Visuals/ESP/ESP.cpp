@@ -152,6 +152,7 @@
 MAKE_SIGNATURE(CTFPlayerSharedUtils_GetEconItemViewByLoadoutSlot, "client.dll", "48 89 6C 24 ? 56 41 54 41 55 41 56 41 57 48 83 EC", 0x0);
 MAKE_SIGNATURE(CEconItemView_GetItemName, "client.dll", "40 53 48 83 EC ? 48 8B D9 C6 81 ? ? ? ? ? E8 ? ? ? ? 48 8B 8B", 0x0);
 
+#ifndef TEXTMODE
 void CESP::Store(CTFPlayer* pLocal)
 {
 	CPU_OPT_SKIP_IF_VERY_LOW_PERF(2); // Skip ESP on very low performance
@@ -190,6 +191,7 @@ void CESP::Store(CTFPlayer* pLocal)
 		break;
 	}
 }
+#endif // TEXTMODE
 
 void CESP::StorePlayers(CTFPlayer* pLocal)
 {
@@ -256,7 +258,7 @@ void CESP::StorePlayers(CTFPlayer* pLocal)
 		}
 
 		int iClassNum = pPlayer->m_iClass();
-		auto pWeapon = pPlayer->m_hActiveWeapon().Get()->As<CTFWeaponBase>();
+		auto pWeapon = pPlayer->m_hActiveWeapon()->As<CTFWeaponBase>();
 
 		// Use pre-calculated distance
 		const Vec3 vDelta = pPlayer->m_vecOrigin() - vLocalOrigin;
@@ -390,13 +392,9 @@ void CESP::StorePlayers(CTFPlayer* pLocal)
 
 			if (Vars::ESP::Player.Value & Vars::ESP::PlayerEnum::Ping && pResource && !bLocal)
 			{
-				auto pNetChan = I::EngineClient->GetNetChannelInfo();
-				if (pNetChan && !pNetChan->IsLoopback())
-				{
-					int iPing = pResource->m_iPing(iIndex);
-					if (iPing && (iPing >= 200 || iPing <= 5))
-						tCache.m_vText.emplace_back(ESPTextEnum::Right, std::format("{}MS", iPing), Vars::Colors::IndicatorTextBad.Value, Vars::Menu::Theme::Background.Value);
-				}
+				int iPing = pResource->m_iPing(iIndex);
+				if (iPing && (iPing >= 200 || iPing <= 5))
+					tCache.m_vText.emplace_back(ESPTextEnum::Right, std::format("{}MS", iPing), Vars::Colors::IndicatorTextBad.Value, Vars::Menu::Theme::Background.Value);
 			}
 
 			if (Vars::ESP::Player.Value & Vars::ESP::PlayerEnum::KDR && pResource && !bLocal)
@@ -1149,6 +1147,7 @@ void CESP::StoreWorld()
 	}
 }
 
+#ifndef TEXTMODE
 void CESP::Draw()
 {
 	if (!Vars::ESP::Draw.Value || !I::EngineClient->IsInGame())
@@ -1158,6 +1157,7 @@ void CESP::Draw()
 	DrawBuildings();
 	DrawPlayers();
 }
+#endif // TEXTMODE
 
 void CESP::DrawPlayers()
 {
@@ -1190,6 +1190,8 @@ void CESP::DrawPlayers()
 				switch (H::Entities.GetModel(pPlayer->entindex()))
 				{
 				case FNV1A::Hash32Const("models/vsh/player/saxton_hale.mdl"):
+				case FNV1A::Hash32Const("models/vsh/player/hell_hale.mdl"):
+				case FNV1A::Hash32Const("models/vsh/player/santa_hale.mdl"):
 					DrawBones(pPlayer, aBones, { HITBOX_SAXTON_HEAD, HITBOX_SAXTON_CHEST, HITBOX_SAXTON_PELVIS }, tCache.m_tColor);
 					DrawBones(pPlayer, aBones, { HITBOX_SAXTON_CHEST, HITBOX_SAXTON_LEFT_UPPER_ARM, HITBOX_SAXTON_LEFT_FOREARM, HITBOX_SAXTON_LEFT_HAND }, tCache.m_tColor);
 					DrawBones(pPlayer, aBones, { HITBOX_SAXTON_CHEST, HITBOX_SAXTON_RIGHT_UPPER_ARM, HITBOX_SAXTON_RIGHT_FOREARM, HITBOX_SAXTON_RIGHT_HAND }, tCache.m_tColor);

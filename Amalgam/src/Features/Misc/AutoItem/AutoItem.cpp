@@ -98,7 +98,7 @@ void CAutoItem::GetAndEquipWeapon(CTFInventoryManager* pInventoryManager, CTFPla
 		return;
 	}
 
-	const auto pAchievementMgr = reinterpret_cast<IAchievementMgr * (*)(void)>(U::Memory.GetVirtual(I::EngineClient, 114))();
+	const auto pAchievementMgr = U::Memory.CallVirtual<114, IAchievementMgr*>(I::EngineClient);
 
 	// Single item, rent or simply get via achievement, use fallback if needed and specified.
 	if (sItemDefs.find(',') == std::string::npos && sItemDefs.find(';') == std::string::npos)
@@ -290,15 +290,11 @@ void CAutoItem::EquipItem(CTFInventoryManager* pInventoryManager, CTFPlayerInven
 
 bool CAutoItem::UnlockAchievementItem(int iAchievementId)
 {
-	const auto pAchievementMgr = reinterpret_cast<IAchievementMgr*(*)(void)>(U::Memory.GetVirtual(I::EngineClient, 114))();
-	if (pAchievementMgr)
+	const auto pAchievementMgr = U::Memory.CallVirtual<114, IAchievementMgr*>(I::EngineClient);
+	if (pAchievementMgr && pAchievementMgr->GetAchievementByID(iAchievementId))
 	{
-		auto pAchievement = reinterpret_cast<IAchievement*>(pAchievementMgr->GetAchievementByID(iAchievementId));
-		if (pAchievement)
-		{
-			pAchievementMgr->AwardAchievement(iAchievementId);
-			return true;
-		}
+		pAchievementMgr->AwardAchievement(iAchievementId);
+		return true;
 	}
 	return false;
 }
@@ -340,8 +336,6 @@ void CAutoItem::Run(CTFPlayer* pLocal)
 		}
 		if (Vars::Misc::Automation::AutoItem::Enable.Value & Vars::Misc::Automation::AutoItem::EnableEnum::Noisemaker 
 			&& pLocalInventory->GetFirstItemOfItemDef(m_iNoisemakerDefIndex))
-		{
 			EquipItem(pInventoryManager, pLocalInventory, iClass, 9, m_iNoisemakerDefIndex, false, false);
-		}
 	}
 }

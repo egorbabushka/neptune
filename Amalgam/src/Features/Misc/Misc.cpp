@@ -742,7 +742,7 @@ int CMisc::AntiBackstab(CTFPlayer* pLocal, CUserCmd* pCmd, bool bSendPacket)
 		if (pPlayer->IsDormant() || !pPlayer->IsAlive() || pPlayer->IsAGhost() || pPlayer->InCond(TF_COND_STEALTHED))
 			continue;
 
-		auto pWeapon = pPlayer->m_hActiveWeapon().Get()->As<CTFWeaponBase>();
+		auto pWeapon = pPlayer->m_hActiveWeapon()->As<CTFWeaponBase>();
 		if (!pWeapon
 			|| pWeapon->GetWeaponID() != TF_WEAPON_KNIFE
 			&& !(G::PrimaryWeaponType == EWeaponType::MELEE && SDK::AttribHookValue(0, "crit_from_behind", pWeapon) > 0)
@@ -846,7 +846,7 @@ void CMisc::PingReducer()
 
 void CMisc::UnlockAchievements()
 {
-	const auto pAchievementMgr = reinterpret_cast<IAchievementMgr * (*)(void)>(U::Memory.GetVirtual(I::EngineClient, 114))();
+	const auto pAchievementMgr = U::Memory.CallVirtual<114, IAchievementMgr*>(I::EngineClient);
 	if (pAchievementMgr)
 	{
 		I::SteamUserStats->RequestCurrentStats();
@@ -859,7 +859,7 @@ void CMisc::UnlockAchievements()
 
 void CMisc::LockAchievements()
 {
-	const auto pAchievementMgr = reinterpret_cast<IAchievementMgr * (*)(void)>(U::Memory.GetVirtual(I::EngineClient, 114))();
+	const auto pAchievementMgr = U::Memory.CallVirtual<114, IAchievementMgr*>(I::EngineClient);
 	if (pAchievementMgr)
 	{
 		I::SteamUserStats->RequestCurrentStats();
@@ -2952,13 +2952,15 @@ void CMisc::ExecBuyBot(CTFPlayer* pLocal)
         {
             Vector stations[] = { Vector(-1346.60f, 573.14f, -92.87f), Vector(-1344.79f, 2652.66f, -52.98f) };
             Vector dest = (pLocal->GetAbsOrigin().DistTo(stations[1]) < pLocal->GetAbsOrigin().DistTo(stations[0])) ? stations[1] : stations[0];
-            F::NavEngine.navTo(dest, danger);
+            if (!F::NavEngine.isPathing())
+                F::NavEngine.navTo(dest, danger);
         }
         else if (mapName == "mvm_mannhattan")
         {
             Vector stations[] = { Vector(-625.83f, 2305.69f, -85.87f), Vector(561.83f, 2282.60f, -84.97f) };
             Vector dest = (pLocal->GetAbsOrigin().DistTo(stations[1]) < pLocal->GetAbsOrigin().DistTo(stations[0])) ? stations[1] : stations[0];
-            F::NavEngine.navTo(dest, danger);
+            if (!F::NavEngine.isPathing())
+                F::NavEngine.navTo(dest, danger);
         }
         else
         {

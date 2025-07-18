@@ -60,23 +60,17 @@ void CAutoDetonate::ApplyDamageDebuffs(CBaseEntity* pTarget, float& flDamage, fl
 		if (pPlayer->IsMarked() && useCritBuffs)
 			extraDamage += (TF_DAMAGE_MINICRIT_MULTIPLIER - 1.f) * flDamage;
 
-		auto pActiveWeapon{ reinterpret_cast<CTFWeaponBase*>(pPlayer->m_hActiveWeapon().Get()) };
+		auto pActiveWeapon{ pPlayer->m_hActiveWeapon()->As<CTFWeaponBase>() };
 		if (auto pMelee = pPlayer->GetWeaponFromSlot(SLOT_MELEE))
 		{
 			if (pMelee->m_iItemDefinitionIndex() == Scout_t_TheCandyCane) // No way someone is using this trash
-			{
 				extraDamage += flDamage * 0.25f;
-			}
 			else if (pActiveWeapon && pActiveWeapon == pMelee)
 			{
 				if (pMelee->m_iItemDefinitionIndex() == Heavy_t_WarriorsSpirit)
-				{
 					extraDamage += flDamage * 0.3f;
-				}
 				else if (pMelee->m_iItemDefinitionIndex() == Heavy_t_FistsofSteel)
-				{
 					damageDebuff += flDamage * 0.4f;
-				}
 			}
 		}
 
@@ -268,7 +262,7 @@ bool CAutoDetonate::FlareCheck(CTFPlayer* pLocal)
 	float flLatency = Vars::Aimbot::Projectile::AutodetAccountPing.Value ? std::max(F::Backtrack.GetReal() - 0.05f, 0.f) : -1.f;
 	for (auto pProjectile : vProjectiles)
 	{
-		auto pWeapon = pProjectile->As<CTFProjectile_Flare>()->m_hLauncher().Get()->As<CTFWeaponBase>();
+		auto pWeapon = pProjectile->As<CTFProjectile_Flare>()->m_hLauncher()->As<CTFWeaponBase>();
 		if (!pWeapon)
 			continue;
 
@@ -321,7 +315,7 @@ bool CAutoDetonate::StickyCheck(CTFPlayer* pLocal, CUserCmd* pCmd)
 	for (auto pProjectile : vProjectiles)
 	{
 		auto pPipebomb = pProjectile->As<CTFGrenadePipebombProjectile>();
-		pWeapon = pWeapon = pProjectile->As<CTFGrenadePipebombProjectile>()->m_hOriginalLauncher().Get()->As<CTFWeaponBase>();
+		pWeapon = pWeapon = pProjectile->As<CTFGrenadePipebombProjectile>()->m_hOriginalLauncher()->As<CTFWeaponBase>();
 		if (!pWeapon)
 			continue;
 
@@ -415,17 +409,14 @@ bool CAutoDetonate::StickyCheck(CTFPlayer* pLocal, CUserCmd* pCmd)
 				}
 
 				auto pHitSticky = pEntity->As<CTFGrenadePipebombProjectile>();
-				auto pOwner = pHitSticky->m_hThrower().Get()->As<CTFPlayer>();
+				auto pOwner = pHitSticky->m_hThrower()->As<CTFPlayer>();
 				if (pHitSticky != pSticky && pOwner == pLocal && vRadiuses.contains(pHitSticky->entindex()))
 				{
 					const float flDistToHitSticky{ pSticky->m_vecOrigin().DistTo(pHitSticky->m_vecOrigin()) };
 					const float flDistToHitStickyPredicted{ vPredictedStickyOrigins[pSticky->entindex()].DistTo(vPredictedStickyOrigins[pHitSticky->entindex()]) };
 					const float flMaxDistanceBetween{ vRadiuses[pSticky->entindex()] + vRadiuses[pHitSticky->entindex()] - 45.f };
-					if (flDistToHitSticky > flMaxDistanceBetween ||
-						flDistToHitStickyPredicted > flMaxDistanceBetween)
-					{
+					if (flDistToHitSticky > flMaxDistanceBetween || flDistToHitStickyPredicted > flMaxDistanceBetween)
 						continue;
-					}
 
 					vHitStickiesTemp.push_back(pHitSticky);
 
@@ -452,9 +443,8 @@ bool CAutoDetonate::StickyCheck(CTFPlayer* pLocal, CUserCmd* pCmd)
 			if (!bIsPartOfATrap)
 			{
 				if (iStickyTraps)
-				{
 					iStickyTraps++;
-				}
+
 				for (auto pVictim : vVictimsTemp)
 				{
 					const bool bSetup{ mHitTargetIndexes.contains(iStickyTraps) };
@@ -478,9 +468,7 @@ bool CAutoDetonate::StickyCheck(CTFPlayer* pLocal, CUserCmd* pCmd)
 		for (int n = 0; n <= iStickyTraps; n++)
 		{
 			if (!mStickyTraps.contains(n) || !mVictims.contains(n))
-			{
 				continue;
-			}
 
 			const auto vTrapVictims = mVictims[n];
 			const auto vTrapStickies = mStickyTraps[n];

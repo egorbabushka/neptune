@@ -265,7 +265,7 @@ void CAutoHeal::GetDangers(CTFPlayer* pTarget, bool bVaccinator, float& flBullet
 		if (pPlayer->IsDormant() || !pPlayer->CanAttack(true, false))
 			continue;
 
-		auto pWeapon = pPlayer->m_hActiveWeapon().Get()->As<CTFWeaponBase>();
+		auto pWeapon = pPlayer->m_hActiveWeapon()->As<CTFWeaponBase>();
 		int nWeaponID = pWeapon ? pWeapon->GetWeaponID() : 0;
 		auto eWeaponType = SDK::GetWeaponType(pWeapon);
 		if (eWeaponType == EWeaponType::UNKNOWN || eWeaponType == EWeaponType::MELEE // if we ever want to port this over to auto uber or something, handle melee
@@ -451,8 +451,8 @@ void CAutoHeal::GetDangers(CTFPlayer* pTarget, bool bVaccinator, float& flBullet
 		case ETFClassID::CTFGrenadePipebombProjectile:
 		case ETFClassID::CTFWeaponBaseMerasmusGrenade:
 		case ETFClassID::CTFProjectile_SpellMeteorShower:
-			pWeapon = pEntity->As<CTFGrenadePipebombProjectile>()->m_hOriginalLauncher().Get()->As<CTFWeaponBase>();
-			pOwner = pEntity->As<CTFWeaponBaseGrenadeProj>()->m_hThrower().Get()->As<CTFPlayer>();
+			pWeapon = pEntity->As<CTFGrenadePipebombProjectile>()->m_hOriginalLauncher()->As<CTFWeaponBase>();
+			pOwner = pEntity->As<CTFWeaponBaseGrenadeProj>()->m_hThrower()->As<CTFPlayer>();
 			break;
 		case ETFClassID::CTFProjectile_Arrow:
 		case ETFClassID::CTFProjectile_HealingBolt:
@@ -463,12 +463,12 @@ void CAutoHeal::GetDangers(CTFPlayer* pTarget, bool bVaccinator, float& flBullet
 		case ETFClassID::CTFProjectile_SpellLightningOrb:
 		case ETFClassID::CTFProjectile_EnergyBall:
 		case ETFClassID::CTFProjectile_Flare:
-			pWeapon = pEntity->As<CTFBaseRocket>()->m_hLauncher().Get()->As<CTFWeaponBase>();
-			pOwner = pWeapon ? pWeapon->m_hOwner().Get()->As<CTFPlayer>() : nullptr;
+			pWeapon = pEntity->As<CTFBaseRocket>()->m_hLauncher()->As<CTFWeaponBase>();
+			pOwner = pWeapon ? pWeapon->m_hOwner()->As<CTFPlayer>() : nullptr;
 			break;
 		case ETFClassID::CTFProjectile_EnergyRing:
-			pWeapon = pEntity->As<CTFBaseProjectile>()->m_hLauncher().Get()->As<CTFWeaponBase>();
-			pOwner = pWeapon ? pWeapon->m_hOwner().Get()->As<CTFPlayer>() : nullptr;
+			pWeapon = pEntity->As<CTFBaseProjectile>()->m_hLauncher()->As<CTFWeaponBase>();
+			pOwner = pWeapon ? pWeapon->m_hOwner()->As<CTFPlayer>() : nullptr;
 		}
 		if (!pOwner || pOwner->m_iTeamNum() == pTarget->m_iTeamNum() || pWeapon && !pWeapon->GetDamage())
 			continue;
@@ -591,7 +591,7 @@ void CAutoHeal::AutoVaccinator(CTFPlayer* pLocal, CWeaponMedigun* pWeapon, CUser
 	};
 
 	std::vector<CTFPlayer*> vTargets = { pLocal };
-	if (auto pTarget = pWeapon->m_hHealingTarget().Get()->As<CTFPlayer>(); pTarget &&
+	if (auto pTarget = pWeapon->m_hHealingTarget()->As<CTFPlayer>(); pTarget &&
 		(!Vars::Aimbot::Healing::FriendsOnly.Value || H::Entities.IsFriend(pTarget->entindex()) || H::Entities.InParty(pTarget->entindex())))
 		vTargets.push_back(pTarget);
 

@@ -106,8 +106,7 @@ void CPlayerlistUtils::AddTag(uint32_t uFriendsID, int iID, bool bSave, std::str
 }
 void CPlayerlistUtils::AddTag(int iIndex, int iID, bool bSave, std::string sName, std::unordered_map<uint32_t, std::vector<int>>& mPlayerTags)
 {
-	if (const uint32_t uFriendsID = GetFriendsID(iIndex))
-		AddTag(uFriendsID, iID, bSave, sName, mPlayerTags);
+	AddTag(GetFriendsID(iIndex), iID, bSave, sName, mPlayerTags);
 }
 void CPlayerlistUtils::AddTag(uint32_t uFriendsID, int iID, bool bSave, std::string sName)
 {
@@ -141,8 +140,7 @@ void CPlayerlistUtils::RemoveTag(uint32_t uFriendsID, int iID, bool bSave, std::
 }
 void CPlayerlistUtils::RemoveTag(int iIndex, int iID, bool bSave, std::string sName, std::unordered_map<uint32_t, std::vector<int>>& mPlayerTags)
 {
-	if (const uint32_t uFriendsID = GetFriendsID(iIndex))
-		RemoveTag(uFriendsID, iID, bSave, sName, mPlayerTags);
+	RemoveTag(GetFriendsID(iIndex), iID, bSave, sName, mPlayerTags);
 }
 void CPlayerlistUtils::RemoveTag(uint32_t uFriendsID, int iID, bool bSave, std::string sName)
 {
@@ -158,13 +156,11 @@ bool CPlayerlistUtils::HasTags(uint32_t uFriendsID, std::unordered_map<uint32_t,
 	if (!uFriendsID)
 		return false;
 
-	return mPlayerTags[uFriendsID].size();
+	return !mPlayerTags[uFriendsID].empty();
 }
 bool CPlayerlistUtils::HasTags(int iIndex, std::unordered_map<uint32_t, std::vector<int>>& mPlayerTags)
 {
-	if (const uint32_t uFriendsID = GetFriendsID(iIndex))
-		return HasTags(uFriendsID, mPlayerTags);
-	return false;
+	return HasTags(GetFriendsID(iIndex), mPlayerTags);
 }
 
 bool CPlayerlistUtils::HasTags(uint32_t uFriendsID)
@@ -189,9 +185,7 @@ bool CPlayerlistUtils::HasTag(uint32_t uFriendsID, int iID, std::unordered_map<u
 }
 bool CPlayerlistUtils::HasTag(int iIndex, int iID, std::unordered_map<uint32_t, std::vector<int>>& mPlayerTags)
 {
-	if (const uint32_t uFriendsID = GetFriendsID(iIndex))
-		return HasTag(uFriendsID, iID, mPlayerTags);
-	return false;
+	return HasTag(GetFriendsID(iIndex), iID, mPlayerTags);
 }
 bool CPlayerlistUtils::HasTag(uint32_t uFriendsID, int iID)
 {
@@ -252,9 +246,7 @@ int CPlayerlistUtils::GetPriority(int iIndex, bool bCache)
 	if (bCache)
 		return H::Entities.GetPriority(iIndex);
 
-	if (const uint32_t uFriendsID = GetFriendsID(iIndex))
-		return GetPriority(uFriendsID);
-	return m_vTags[TagToIndex(DEFAULT_TAG)].m_iPriority;
+	return GetPriority(GetFriendsID(iIndex));
 }
 
 PriorityLabel_t* CPlayerlistUtils::GetSignificantTag(uint32_t uFriendsID, int iMode)
@@ -335,16 +327,11 @@ PriorityLabel_t* CPlayerlistUtils::GetSignificantTag(uint32_t uFriendsID, int iM
 }
 PriorityLabel_t* CPlayerlistUtils::GetSignificantTag(int iIndex, int iMode)
 {
-	if (const uint32_t uFriendsID = GetFriendsID(iIndex))
-		return GetSignificantTag(uFriendsID, iMode);
-	return nullptr;
+	return GetSignificantTag(GetFriendsID(iIndex), iMode);
 }
 
 bool CPlayerlistUtils::IsIgnored(uint32_t uFriendsID)
 {
-	if (!uFriendsID)
-		return false;
-
 	if (HasTag(uFriendsID, TagToIndex(FRIEND_IGNORE_TAG)))
 		return true;
 
@@ -356,7 +343,7 @@ bool CPlayerlistUtils::IsIgnored(uint32_t uFriendsID)
 			
 		if (botData.m_iKillCount >= 2)
 		{
-			// nigga u killed me twice, now youll feel my rough.
+			// bigga u killed me twice, now youll feel my rough.
 			RemoveTag(uFriendsID, TagToIndex(BOT_IGNORE_TAG), true);
 			botData.m_iKillCount = 0;
 			botData.m_bIsIgnored = false;
@@ -372,9 +359,7 @@ bool CPlayerlistUtils::IsIgnored(uint32_t uFriendsID)
 }
 bool CPlayerlistUtils::IsIgnored(int iIndex)
 {
-	if (const uint32_t uFriendsID = GetFriendsID(iIndex))
-		return IsIgnored(uFriendsID);
-	return false;
+	return IsIgnored(GetFriendsID(iIndex));
 }
 
 bool CPlayerlistUtils::IsPrioritized(uint32_t uFriendsID)
@@ -388,9 +373,7 @@ bool CPlayerlistUtils::IsPrioritized(uint32_t uFriendsID)
 }
 bool CPlayerlistUtils::IsPrioritized(int iIndex)
 {
-	if (const uint32_t uFriendsID = GetFriendsID(iIndex))
-		return IsPrioritized(uFriendsID);
-	return false;
+	return IsPrioritized(GetFriendsID(iIndex));
 }
 
 const char* CPlayerlistUtils::GetPlayerName(int iIndex, const char* sDefault, int* pType)

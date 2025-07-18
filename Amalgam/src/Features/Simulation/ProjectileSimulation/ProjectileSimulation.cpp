@@ -645,7 +645,7 @@ void CProjectileSimulation::SetupTrace(CTraceFilterCollideable& filter, int& nMa
 		nMask |= CONTENTS_WATER;
 	}
 }
-#else
+#elif 0 // disable internal stub definitions
 // TEXTMODE stubs for missing methods
 bool CProjectileSimulation::GetInfo(CTFPlayer* pPlayer, CTFWeaponBase* pWeapon, Vec3 vAngles, ProjectileInfo& tProjInfo, int iFlags, float flAutoCharge)
 {

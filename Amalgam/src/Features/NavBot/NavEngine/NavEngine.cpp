@@ -370,7 +370,8 @@ void CNavParser::Map::updateIgnores()
 		for (auto pEntity : H::Entities.GetGroup(EGroupType::WORLD_PROJECTILES))
 		{
 			auto pSticky = pEntity->As<CTFGrenadePipebombProjectile>();
-			if (pSticky->GetClassID() != ETFClassID::CTFGrenadePipebombProjectile || pSticky->m_iTeamNum() == pLocal->m_iTeamNum() || pSticky->m_iType() != TF_GL_MODE_REMOTE_DETONATE || pSticky->IsDormant() || !pSticky->m_vecVelocity().IsZero(1.f))
+			if (pSticky->GetClassID() != ETFClassID::CTFGrenadePipebombProjectile || pSticky->m_iTeamNum() == pLocal->m_iTeamNum() ||
+				pSticky->m_iType() != TF_GL_MODE_REMOTE_DETONATE || pSticky->IsDormant() || !pSticky->m_vecVelocity().IsZero(1.f))
 				continue;
 
 			auto sticky_origin = pSticky->GetAbsOrigin();

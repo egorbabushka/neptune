@@ -1,4 +1,5 @@
 #include "Killstreak.h"
+#ifndef TEXTMODE
 
 int CKillstreak::GetCurrentStreak()
 {
@@ -78,3 +79,4 @@ void CKillstreak::Reset()
 	m_iCurrentKillstreak = 0;
 	m_mKillstreakMap.clear();
 }
+#endif // TEXTMODE

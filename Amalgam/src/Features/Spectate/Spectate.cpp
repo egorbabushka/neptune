@@ -1,4 +1,5 @@
 #include "Spectate.h"
+#ifndef TEXTMODE
 
 void CSpectate::NetUpdateEnd(CTFPlayer* pLocal)
 {
@@ -78,3 +79,4 @@ void CSpectate::SetTarget(int iTarget)
 {
 	m_iIntendedTarget = m_iIntendedTarget == iTarget ? -1 : iTarget;
 }
+#endif // TEXTMODE

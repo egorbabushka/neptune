@@ -76,7 +76,7 @@ MAKE_HOOK(CTFPlayer_FireBullet, S::CTFPlayer_FireBullet(), void,
 		H::Particles.ParticleTracer("merasmus_zap_beam01", trace.startpos, trace.endpos, pLocal->entindex(), iAttachment, true);
 		break;
 	case FNV1A::Hash32Const("Line"):
-	case FNV1A::Hash32Const("Clipped line"):
+	case FNV1A::Hash32Const("Line ignore Z"):
 	{
 		float flTime = I::GlobalVars->curtime + Vars::Visuals::Line::DrawDuration.Value;
 		for (auto& tLine : G::LineStorage)
@@ -90,9 +90,9 @@ MAKE_HOOK(CTFPlayer_FireBullet, S::CTFPlayer_FireBullet(), void,
 
 		bool bNospreadBullet = F::NoSpreadHitscan.m_iPredictionBullet > -1 && iBullet == F::NoSpreadHitscan.m_iPredictionBullet;
 		if (uHash == FNV1A::Hash32Const("Line"))
-			G::LineStorage.emplace_back(std::pair<Vec3, Vec3>(trace.startpos, trace.endpos), flTime, bNospreadBullet ? Vars::Colors::NoSpread.Value : Vars::Colors::Line.Value);
+			G::LineStorage.emplace_back(std::pair<Vec3, Vec3>(trace.startpos, trace.endpos), flTime, bNospreadBullet ? Vars::Colors::NoSpread.Value : Vars::Colors::Line.Value, true);
 		else
-			G::LineStorage.emplace_back(std::pair<Vec3, Vec3>(trace.startpos, trace.endpos), flTime, bNospreadBullet ? Vars::Colors::NoSpread.Value : Vars::Colors::LineClipped.Value, true);
+			G::LineStorage.emplace_back(std::pair<Vec3, Vec3>(trace.startpos, trace.endpos), flTime, bNospreadBullet ? Vars::Colors::NoSpread.Value : Vars::Colors::LineIgnoreZ.Value);
 
 		break;
 		SDK::Output("CBaseEntity_FireBullets", std::format("Fired bullet({},{}), m_bPrimaryAttack: {}", iBullet, info.m_iTracerFreq, info.m_bPrimaryAttack).c_str(), Vars::Menu::Theme::Accent.Value);

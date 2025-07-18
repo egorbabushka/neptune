@@ -64,12 +64,10 @@ private:
 	bool m_bCritBanned = false;
 	float m_flDamageTilFlip = 0;
 	float m_flCritChance = 0.f;
-	int m_iWishRandomSeed = 0;
 
 public:
 	float GetCost( CTFWeaponBase* pWeapon );
 	void Run(CTFPlayer* pLocal, CTFWeaponBase* pWeapon, CUserCmd* pCmd);
-	bool CalcIsAttackCriticalHandler();
 	void Event(IGameEvent* pEvent, uint32_t uHash, CTFPlayer* pLocal);
 	void Store();
 	void Draw(CTFPlayer* pLocal);
@@ -80,6 +78,7 @@ public:
 	bool m_bForce = false;
 
 	std::unordered_map<int, WeaponStorage_t> m_mStorage = {};
+	int m_iWishRandomSeed = 0;
 };
 
 ADD_FEATURE(CCritHack, CritHack);

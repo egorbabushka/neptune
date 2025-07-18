@@ -115,7 +115,6 @@ void CRadar::DrawBackground()
 
 void CRadar::DrawPoints(CTFPlayer* pLocal)
 {
-	// Ammo & Health
 	if (Vars::Radar::World::Enabled.Value)
 	{
 		const int iSize = Vars::Radar::World::Size.Value;
@@ -247,7 +246,6 @@ void CRadar::DrawPoints(CTFPlayer* pLocal)
 		}
 	}
 
-	// Draw buildings
 	if (Vars::Radar::Building::Enabled.Value)
 	{
 		const int iSize = Vars::Radar::Building::Size.Value;
@@ -316,7 +314,6 @@ void CRadar::DrawPoints(CTFPlayer* pLocal)
 		}
 	}
 
-	// Draw Players
 	if (Vars::Radar::Player::Enabled.Value)
 	{
 		const int iSize = Vars::Radar::Player::Size.Value;
